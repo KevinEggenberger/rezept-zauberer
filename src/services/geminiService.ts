@@ -1,16 +1,19 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { type Recipe } from "../types"; // ✅ korrigierter Pfad
 
-// Check if API key is available, but don't throw immediately
+// Get API key from environment, can be null initially
 const apiKey = import.meta.env.VITE_API_KEY;
 
-if (!apiKey) {
+// Create AI instance only if API key exists
+let ai: GoogleGenAI | null = null;
+
+if (apiKey) {
+  ai = new GoogleGenAI({ apiKey });
+} else {
   console.warn(
     "⚠️ VITE_API_KEY environment variable not set. The app will not function without a valid Gemini API key."
   );
 }
-
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const recipeSchema = {
   type: Type.OBJECT,
