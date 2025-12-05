@@ -1,11 +1,16 @@
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { type Recipe } from "../types"; // ✅ korrigierter Pfad
 
-if (!import.meta.env.VITE_API_KEY) {
-  throw new Error("API_KEY environment variable not set");
+// Check if API key is available, but don't throw immediately
+const apiKey = import.meta.env.VITE_API_KEY;
+
+if (!apiKey) {
+  console.warn(
+    "⚠️ VITE_API_KEY environment variable not set. The app will not function without a valid Gemini API key."
+  );
 }
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const recipeSchema = {
   type: Type.OBJECT,
@@ -51,6 +56,12 @@ const recipeSchema = {
 export async function generateRecipeFromIngredients(
   ingredients: string[]
 ): Promise<Recipe> {
+  if (!ai) {
+    throw new Error(
+      "❌ API Key nicht konfiguriert. Bitte setzen Sie die Umgebungsvariable VITE_API_KEY mit Ihrem Google Gemini API Key."
+    );
+  }
+
   const ingredientList = ingredients.join(", ");
   const prompt = `Du bist ein Meisterkoch. Erstelle ein kreatives und köstliches Rezept, das hauptsächlich die folgenden Zutaten verwendet: ${ingredientList}. Du kannst grundlegende Vorratsartikel wie Salz, Pfeffer, Öl, Wasser, Mehl und Zucker annehmen, wenn sie benötigt werden. Konzentriere dich aber auf die bereitgestellten Zutaten. Gib deine Antwort ausschließlich im JSON-Format zurück.`;
 
@@ -89,6 +100,12 @@ export async function generateRecipeFromIngredients(
 export async function generateImageForRecipe(
   recipeName: string
 ): Promise<string> {
+  if (!ai) {
+    throw new Error(
+      "❌ API Key nicht konfiguriert. Bitte setzen Sie die Umgebungsvariable VITE_API_KEY mit Ihrem Google Gemini API Key."
+    );
+  }
+
   const prompt = `Professionelle Food-Fotografie von "${recipeName}". Appetitlich, hochauflösend, gut beleuchtet, auf einem schönen Teller, im Stil eines Kochbuchfotos.`;
 
   try {
